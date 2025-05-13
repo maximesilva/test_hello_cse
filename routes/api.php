@@ -24,14 +24,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::middleware('role:admin')->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return response()->json(['message' => 'Bienvenue dans le dashboard admin']);
-        });
+        Route::post('/profiles/{profile}/comments', [CommentController::class, 'store']);
+        Route::post('/profiles', [ProfileController::class, 'store']);
     });
 
-    // Routes pour les commentaires
-    Route::post('/profiles/{profile}/comments', [CommentController::class, 'store']);
+    
+});
 
-    // Routes pour les profils
-    Route::post('/profiles', [ProfileController::class, 'store']);
+// Routes publiques
+Route::get('/profiles', [ProfileController::class, 'index']);
+
+// Routes protégées par authentification
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    // ... existing code ...
 }); 
