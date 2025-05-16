@@ -24,8 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::middleware('role:admin')->group(function () {
-        Route::post('/profiles/{profile}/comments', [CommentController::class, 'store']);
         Route::post('/profiles', [ProfileController::class, 'store']);
+        Route::post('/profiles/{profile}/comments', [CommentController::class, 'store']);
+        Route::put('/profiles/{profile}', [ProfileController::class, 'update']);
+        Route::delete('/profiles/{profile}', [ProfileController::class, 'destroy']);
     });
 });
 

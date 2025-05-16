@@ -286,14 +286,8 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "first_name",
-                                    "image",
-                                    "status"
-                                ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
@@ -310,9 +304,11 @@
                                     "status": {
                                         "type": "string",
                                         "enum": [
-                                            "active",
-                                            "inactive"
-                                        ]
+                                            "actif",
+                                            "inactif",
+                                            "en attente"
+                                        ],
+                                        "example": "actif"
                                     }
                                 },
                                 "type": "object"
@@ -355,14 +351,154 @@
                     }
                 ]
             }
+        },
+        "/api/profiles/{profile}": {
+            "put": {
+                "tags": [
+                    "Profils"
+                ],
+                "summary": "Modifier un profil",
+                "description": "Met à jour un profil existant.",
+                "operationId": "1e187c7041d7c2f59b25ee3dcba24a85",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "UUID du profil",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "actif",
+                                            "inactif",
+                                            "en attente"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil modifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "profile": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    },
+                    "404": {
+                        "description": "Profil non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Profils"
+                ],
+                "summary": "Supprimer un profil",
+                "description": "Supprime un profil existant.",
+                "operationId": "8036909d31fd2911ac2173637511ba98",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "UUID du profil",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profil supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    },
+                    "404": {
+                        "description": "Profil non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "bearerFormat": "JWT",
-                "scheme": "bearer"
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
             }
         }
     },
@@ -378,6 +514,11 @@
         {
             "name": "Profils",
             "description": "Profils"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
         }
     ]
 }

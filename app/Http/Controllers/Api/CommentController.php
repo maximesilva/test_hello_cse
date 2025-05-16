@@ -65,8 +65,8 @@ class CommentController extends Controller
         // Créer le commentaire
         $comment = Comment::create([
             'content' => $request->validated('content'),
-            'profile_id' => $profile->id,
-            'created_by' => $request->user()->id,
+            'profile_id' => $profile->getKey(),
+            'created_by' => $request->user()->getKey(),
         ]);
 
         return response()->json([

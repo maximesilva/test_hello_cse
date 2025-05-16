@@ -23,7 +23,6 @@ class ProfileResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
 
-        // Ajouter le statut uniquement pour les utilisateurs authentifiés
         if ($request->user()) {
             $data['status'] = $this->status;
         }

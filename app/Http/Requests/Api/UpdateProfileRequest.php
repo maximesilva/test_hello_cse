@@ -8,7 +8,7 @@ use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class StoreProfileRequest extends FormRequest
+class UpdateProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,11 +26,11 @@ class StoreProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'first_name' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif',
-            'status' => ['required', new Enum(ProfilStatus::class)],
-        ];
+            'name' => 'sometimes|required|string|max:255',
+            'first_name' => 'sometimes|required|string|max:255',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'status' => ['sometimes', new Enum(ProfilStatus::class)],
+        ]; 
     }
 
     /**
@@ -45,11 +45,9 @@ class StoreProfileRequest extends FormRequest
             'name.max' => 'Le nom ne peut pas dépasser 255 caractères',
             'first_name.required' => 'Le prénom est requis',
             'first_name.max' => 'Le prénom ne peut pas dépasser 255 caractères',
-            'image.required' => 'L\'image est requise',
             'image.image' => 'Le fichier doit être une image',
             'image.mimes' => 'L\'image doit être au format jpeg, png, jpg ou gif',
             'image.max' => 'L\'image ne peut pas dépasser 2MB',
-            'status.required' => 'Le statut est requis',
             'status.enum' => 'Le statut n\'est pas valide',
         ];
     }
@@ -63,11 +61,7 @@ class StoreProfileRequest extends FormRequest
             $file = $this->file('image');
             $extension = $file->getClientOriginalExtension();
             $filename = Str::uuid() . '.' . $extension;
-            
-            // Stocker l'image dans le dossier public/profiles
             $path = $file->storeAs('profiles', $filename, 'public');
-            
-            // Ajouter le chemin de l'image aux données validées
             $this->merge(['image_path' => $path]);
         }
     }

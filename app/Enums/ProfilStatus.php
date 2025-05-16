@@ -4,9 +4,9 @@ namespace App\Enums;
 
 enum ProfilStatus: string
 {
-    case INACTIVE = 'inactive';
-    case PENDING = 'pending';
-    case ACTIVE = 'active';
+    case INACTIVE = 'inactif';
+    case PENDING = 'en attente';
+    case ACTIVE = 'actif';
 
     public function label(): string
     {
