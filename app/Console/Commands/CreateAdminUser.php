@@ -32,7 +32,6 @@ class CreateAdminUser extends Command
         $this->newLine();
 
         $email = $this->ask('Quel est l\'email de l\'administrateur ?', 'admin@example.com');
-        $firstName = $this->ask('Quel est le prénom de l\'administrateur ?', 'Super');
         $name = $this->ask('Quel est le nom de l\'administrateur ?', 'Admin');
         $password = $this->secret('Quel est le mot de passe de l\'administrateur ?');
 
@@ -51,9 +50,7 @@ class CreateAdminUser extends Command
             ],
             [
                 'name' => $name,
-                'first_name' => $firstName,
                 'password' => Hash::make($password),
-                'status' => 'active',
             ]
         );
 
@@ -67,7 +64,6 @@ class CreateAdminUser extends Command
             ['Champ', 'Valeur'],
             [
                 ['Email', $email],
-                ['Prénom', $firstName],
                 ['Nom', $name],
                 ['Mot de passe', $password],
             ]

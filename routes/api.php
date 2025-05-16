@@ -27,14 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/profiles/{profile}/comments', [CommentController::class, 'store']);
         Route::post('/profiles', [ProfileController::class, 'store']);
     });
-
-    
 });
 
-// Routes publiques
 Route::get('/profiles', [ProfileController::class, 'index']);
-
-// Routes protégées par authentification
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    // ... existing code ...
-}); 
