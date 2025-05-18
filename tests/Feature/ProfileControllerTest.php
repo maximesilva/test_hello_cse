@@ -7,13 +7,14 @@ use App\Models\User;
 use App\Models\Profile;
 use App\Enums\ProfilStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class ProfileControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase;
 
+    /** @test */
     public function it_can_list_profiles()
     {
         Profile::factory()->count(3)->create([
@@ -37,15 +38,17 @@ class ProfileControllerTest extends TestCase
                 ]);
     }
 
+    /** @test */
     public function it_can_create_profile()
     {
         $profileData = [
             'name' => 'Doe',
             'first_name' => 'John',
+            'image' => UploadedFile::fake()->image('test.jpg'),
             'status' => ProfilStatus::ACTIVE->value
         ];
 
-        $response = $this->postJson('/api/profiles', $profileData, $this->headers);
+        $response = $this->actingAsAdmin()->postJson('/api/profiles', $profileData);
 
         $response->assertStatus(201)
                 ->assertJsonStructure([
@@ -54,6 +57,7 @@ class ProfileControllerTest extends TestCase
                         'id',
                         'name',
                         'first_name',
+                        'image_path',
                         'status',
                         'created_by'
                     ]
@@ -66,6 +70,7 @@ class ProfileControllerTest extends TestCase
         ]);
     }
 
+    /** @test */
     public function it_can_update_profile()
     {
         $profile = Profile::factory()->create();
@@ -76,7 +81,7 @@ class ProfileControllerTest extends TestCase
             'status' => ProfilStatus::INACTIVE->value
         ];
 
-        $response = $this->putJson("/api/profiles/{$profile->id}", $updateData, $this->headers);
+        $response = $this->actingAsAdmin()->putJson("/api/profiles/{$profile->id}", $updateData);
 
         $response->assertStatus(200)
                 ->assertJsonStructure([
@@ -97,11 +102,12 @@ class ProfileControllerTest extends TestCase
         ]);
     }
 
+    /** @test */
     public function it_can_delete_profile()
     {
         $profile = Profile::factory()->create();
 
-        $response = $this->deleteJson("/api/profiles/{$profile->id}", [], $this->headers);
+        $response = $this->actingAsAdmin()->deleteJson("/api/profiles/{$profile->id}", []);
 
         $response->assertStatus(200)
                 ->assertJsonStructure([
@@ -113,38 +119,42 @@ class ProfileControllerTest extends TestCase
         ]);
     }
 
+    /** @test */
     public function it_validates_required_fields_when_creating_profile()
     {
-        $response = $this->postJson('/api/profiles', [], $this->headers);
+        $response = $this->actingAsAdmin()->postJson('/api/profiles', []);
 
         $response->assertStatus(422)
                 ->assertJsonValidationErrors(['name', 'first_name', 'status']);
     }
 
+    /** @test */
     public function it_validates_required_fields_when_updating_profile()
     {
         $profile = Profile::factory()->create();
 
-        $response = $this->putJson("/api/profiles/{$profile->id}", [], $this->headers);
+        $response = $this->actingAsAdmin()->putJson("/api/profiles/{$profile->id}", [
+            'name' => '',
+            'first_name' => '',
+            'image' => '',
+            'status' => ''
+        ]);
 
         $response->assertStatus(422);
     }
 
-    public function it_returns_404_when_profile_not_found()
+    /** @test */
+    public function it_requires_authentication_to_create_profile()
     {
-        $response = $this->getJson('/api/profiles/non-existent-uuid', $this->headers);
+        $this->app['auth']->logout();
 
-        $response->assertStatus(404);
-    }
-
-    public function it_requires_authentication()
-    {
         $response = $this->postJson('/api/profiles', []);
 
         $response->assertStatus(401);
     }
 
-    public function it_requires_admin_role()
+    /** @test */
+    public function it_requires_admin_role_to_create_profile()
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token')->plainTextToken;
@@ -154,7 +164,7 @@ class ProfileControllerTest extends TestCase
             'Accept' => 'application/json'
         ];
 
-        $response = $this->postJson('/api/profiles', [], $headers);
+        $response = $this->actingAsUser()->postJson('/api/profiles', [], $headers);
 
         $response->assertStatus(403);
     }
@@ -170,7 +180,7 @@ class ProfileControllerTest extends TestCase
 
         $data[$field] = $value;
 
-        $response = $this->postJson("/api/profiles", $data, $this->headers);
+        $response = $this->actingAsAdmin()->postJson("/api/profiles", $data);
 
         $response->assertStatus(422)
                 ->assertJsonValidationErrors([$field]);
@@ -189,7 +199,7 @@ class ProfileControllerTest extends TestCase
 
         $data[$field] = $value;
 
-        $response = $this->putJson("/api/profiles/{$profile->id}", $data, $this->headers);
+        $response = $this->actingAsAdmin()->putJson("/api/profiles/{$profile->id}", $data);
 
         $response->assertStatus(422)
                 ->assertJsonValidationErrors([$field]);

@@ -15,7 +15,11 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+    }
+
+    protected function actingAsAdmin(): self
+    {
+        $this->app['auth']->logout();
         $adminRole = Role::create(['name' => 'admin']);
         
         $this->user = User::factory()->create([
@@ -30,9 +34,24 @@ abstract class TestCase extends BaseTestCase
         ]);
         
         $this->token = $response->json('token');
-        $this->headers = [
+        return $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
             'Accept' => 'application/json'
-        ];
+        ]);
+    }
+
+    protected function actingAsUser()
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+        
+        $this->app['auth']->logout();
+        
+        $this->actingAs($user);
+        
+        return $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json'
+        ]);
     }
 }
